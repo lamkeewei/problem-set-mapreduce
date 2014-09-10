@@ -15,14 +15,14 @@ public class TaskOne implements Mapper, Reducer {
 
   @Override
   public HashMap map(List list) {
-    HashMap<String, String> results = new HashMap<>();
+    HashMap results = new HashMap<>();
 
     for (Object r : list) {
       String record = (String) r;
       String[] tokens = record.split(",");
       int hour = Helper.grabHour(tokens[0]);
       int minute = Helper.grabMinute(tokens[0]);
-      int second = Helper.grabSecond(tokens[0]);
+      // int second = Helper.grabSecond(tokens[0]);
       
       boolean withinTime = hour >= START_TIME && hour <= END_TIME; ;
       if(hour == END_TIME) {
@@ -30,27 +30,29 @@ public class TaskOne implements Mapper, Reducer {
       }
 
       if (tokens[2].startsWith(FILTER) && withinTime) {
-        results.put(tokens[2], tokens[1]);
-        System.out.println(hour + ":" + minute);
+        if(results.get(tokens[2])==null) {
+          results.put(tokens[2],1);
+        } else {
+          int i = (int) results.get(tokens[2]);
+          results.put(tokens[2],i+1);
+        }
       }
     }
-
+    // System.out.println("Results size: " + results.size());
     return results;
   }
 
   @Override
   public HashMap reduce(Object key, List data) {
-      HashMap<Object, Integer> result = new HashMap<Object, Integer>(1);
-      Set<String> uniqueUsers = new HashSet<>();
-
-      for (Object id : data) {      
-        uniqueUsers.add((String) id);
-      }
-      if (uniqueUsers.size() > 5) {
-        System.out.println(key);
-      }
-      result.put(key, uniqueUsers.size());
-      return result;
+    HashMap map = new HashMap();
+    int count = 0;
+    for(Object o: data){
+      int v = (int) o;
+      count+= v;
+    }
+    map.put(key,count);
+    // System.out.println("Reduced size: " + map.size());
+    return map;
   }
 
   
@@ -64,9 +66,9 @@ public class TaskOne implements Mapper, Reducer {
 
       System.out.println(data.size() + " records loaded");
     } catch (IOException e) {
-        System.err.println("Can't read file.  See stack trace");
-        e.printStackTrace();
-        System.exit(0);
+      System.err.println("Can't read file.  See stack trace");
+      e.printStackTrace();
+      System.exit(0);
     }
 
     TaskOne mapper = new TaskOne(); 
@@ -82,8 +84,8 @@ public class TaskOne implements Mapper, Reducer {
 
     } catch (InterruptedException e) {
 
-        System.out.println("Something unexpected happened");
-        e.printStackTrace();
+      System.out.println("Something unexpected happened");
+      e.printStackTrace();
     }
 
     long e = System.currentTimeMillis(); 
@@ -91,19 +93,18 @@ public class TaskOne implements Mapper, Reducer {
     System.out.println("Clock time elapsed: " + (e - s) + " ms");
 
     int max = 0;
+    String location = "";
 
     for (Object key : results.keySet()) {
-      List values = results.get(key);
-
-      for (Object o : values) {
-        int size = (int) o;
-
-        if (size > max) {
-          max = size;
-        }
+      // list size is 1, caused reducer also performed combine step
+      int size = (int)results.get(key).get(0);
+      if (size > max) {
+        max = size;
+        location = (String) key;
       }
     }
 
-    System.out.println("Max Value: " + max);
+    System.out.println("Count: " + max);
+    System.out.println("Location: " + location);
   }
 }
