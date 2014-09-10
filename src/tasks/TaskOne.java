@@ -23,23 +23,22 @@ public class TaskOne implements Mapper, Reducer {
       String record = (String) r;
       String[] tokens = record.split(",");
       int hour = Helper.grabHour(tokens[0]);
-      int minute = Helper.grabMinute(tokens[0]);
       String locationCode = tokens[2];
       String location = (String) locationMap.get(locationCode);
       // int second = Helper.grabSecond(tokens[0]);
 
       boolean withinTime = hour >= START_TIME && hour <= END_TIME; ;
       if(hour == END_TIME) {
-        withinTime = minute == 0;
+        withinTime = Helper.grabMinute(tokens[0]) == 0;
       }
 
       if (locationCode.startsWith(FILTER) && withinTime) {
+        List<String> userIds = null;
         if(results.get(location)==null) {
-          List<String> userIds = new ArrayList<>();
-          userIds.add(tokens[1]);
-          results.put(location,userIds);
+          userIds = new ArrayList<>();
+        } else {
+          userIds = (ArrayList<String>) results.get(location);
         }
-        List<String> userIds = (ArrayList<String>) results.get(location);
         userIds.add(tokens[1]);
         results.put(location,userIds);
       }
@@ -51,20 +50,17 @@ public class TaskOne implements Mapper, Reducer {
   @Override
   public HashMap reduce(Object key, List data) {
     HashMap map = new HashMap();
-    int count = 0;
     Set<String> userIds = new HashSet<>();
-    int uniqueCount = 0;
     for(Object o: data){
       List<String> list = (ArrayList) o;
       for(String id:list) {
         if (!userIds.contains(id)) {
           userIds.add(id);
-          uniqueCount++;
         }
       }
 
     }
-    map.put(key,uniqueCount);
+    map.put(key,userIds.size());
     // System.out.println("Reduced size: " + map.size());
     return map;
   }
@@ -116,8 +112,6 @@ public class TaskOne implements Mapper, Reducer {
 
     int max = 0;
     String location = "";
-    System.out.println("Results size: " + results.size());
-
     for (Object key : results.keySet()) {
       // list size is 1, caused reducer also performed combine step
       int size = (int) results.get(key).get(0);
