@@ -1,8 +1,6 @@
 package util;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Date;
+import java.util.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -47,5 +45,20 @@ public class Helper {
   public static int grabSecond(String dateStr) {
     int pos = dateStr.indexOf(" ");
     return Integer.parseInt(dateStr.substring(pos + 7, pos + 9));
-  }    
+  }
+
+  public static HashMap mapLocation(List list) {
+    HashMap results = new HashMap<>();
+    for (Object r : list) {
+      String record = (String) r;
+      String[] tokens = record.split(",");
+      String code = tokens[0];
+      String location = tokens[1];
+      if(results.get(code)==null) {
+        results.put(code,location);
+      }
+    }
+    return results;
+
+  }
 }

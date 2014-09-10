@@ -8,10 +8,12 @@ import aa.MapReduce;
 import util.Helper;
 import java.net.*;
 
-public class TaskOne implements Mapper, Reducer { 
+public class TaskOne implements Mapper, Reducer {
+
   private final String FILTER = "101020";
   private final int START_TIME = 12;
   private final int END_TIME = 13;
+  private static HashMap locationMap;
 
   @Override
   public HashMap map(List list) {
@@ -22,21 +24,24 @@ public class TaskOne implements Mapper, Reducer {
       String[] tokens = record.split(",");
       int hour = Helper.grabHour(tokens[0]);
       int minute = Helper.grabMinute(tokens[0]);
+      String locationCode = tokens[2];
+      String location = (String) locationMap.get(locationCode);
       // int second = Helper.grabSecond(tokens[0]);
-      
+
       boolean withinTime = hour >= START_TIME && hour <= END_TIME; ;
       if(hour == END_TIME) {
         withinTime = minute == 0;
       }
-      if (tokens[2].startsWith(FILTER) && withinTime) {
-        if(results.get(tokens[2])==null) {
+
+      if (locationCode.startsWith(FILTER) && withinTime) {
+        if(results.get(location)==null) {
           List<String> userIds = new ArrayList<>();
           userIds.add(tokens[1]);
-          results.put(tokens[2],userIds);
+          results.put(location,userIds);
         }
-        List<String> userIds = (ArrayList<String>) results.get(tokens[2]);
+        List<String> userIds = (ArrayList<String>) results.get(location);
         userIds.add(tokens[1]);
-        results.put(tokens[2],userIds);
+        results.put(location,userIds);
       }
     }
     // System.out.println("Results size: " + results.size());
@@ -57,28 +62,36 @@ public class TaskOne implements Mapper, Reducer {
           uniqueCount++;
         }
       }
-      
+
     }
     map.put(key,uniqueCount);
     // System.out.println("Reduced size: " + map.size());
     return map;
   }
 
-  
+
   public static void main(String[] args) {
     List<String> data = new ArrayList<>();
+    List<String> locations = new ArrayList<>();
 
     try {
+      int i = 0;
       for (String fileName : args) {
-        data.addAll(Helper.readFile(fileName));
+        if(i==0) {
+          locations.addAll(Helper.readFile(fileName));
+          i++;
+        } else {
+          data.addAll(Helper.readFile(fileName));
+        }
       }
-
       System.out.println(data.size() + " records loaded");
     } catch (IOException e) {
       System.err.println("Can't read file.  See stack trace");
       e.printStackTrace();
       System.exit(0);
     }
+
+    locationMap = Helper.mapLocation(locations);
 
     TaskOne mapper = new TaskOne(); 
     TaskOne reducer = new TaskOne(); 
