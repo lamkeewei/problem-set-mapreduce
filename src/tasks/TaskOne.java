@@ -13,7 +13,6 @@ public class TaskOne implements Mapper, Reducer {
   private final int START_TIME = 12;
   private final int END_TIME = 13;
   private static Map<String,String> locationMapping;
-  private final String PATTERN = "(.*)2-[0-9][0-9]?";
 
   @Override
   public HashMap map(List list) {
@@ -27,7 +26,7 @@ public class TaskOne implements Mapper, Reducer {
 
       boolean withinTime = hour == START_TIME || tokens[2].indexOf("13:00:00") > -1;
 
-      if (tokens[2].startsWith(FILTER) && withinTime && roomID.matches(PATTERN)) {
+      if (tokens[2].startsWith(FILTER) && withinTime && roomID.indexOf("SR2-") > -1) {
         if(results.get(roomID) == null) {
           List newList = new LinkedList();
           newList.add(tokens[1]);
