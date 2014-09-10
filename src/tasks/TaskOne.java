@@ -23,23 +23,18 @@ public class TaskOne implements Mapper, Reducer {
       String record = (String) r;
       String[] tokens = record.split(",");
       int hour = Helper.grabHour(tokens[0]);
-      int minute = Helper.grabMinute(tokens[0]);
-      // int second = Helper.grabSecond(tokens[0]);
       String roomID = locationMapping.get(tokens[2]);
 
-      boolean withinTime = hour >= START_TIME && hour <= END_TIME;
-      if(hour == END_TIME) {
-        withinTime = minute == 0;
-      }
+      boolean withinTime = hour == START_TIME || tokens[2].indexOf("13:00:00") > -1;
 
       if (tokens[2].startsWith(FILTER) && withinTime && roomID.matches(PATTERN)) {
         if(results.get(roomID) == null) {
-          List newList = new ArrayList();
+          List newList = new LinkedList();
           newList.add(tokens[1]);
 
           results.put((String) roomID, newList);
         } else {
-          List prev = (ArrayList) results.get(roomID);
+          List prev = (LinkedList) results.get(roomID);
           prev.add(tokens[1]);
         }
       }
@@ -54,7 +49,6 @@ public class TaskOne implements Mapper, Reducer {
     Set set = new HashSet();
 
     for(Object o: data){
-      // Need to append a "," infront
       set.addAll((List) o);    
     }  
 
