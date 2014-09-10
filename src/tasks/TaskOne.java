@@ -15,26 +15,26 @@ public class TaskOne implements Mapper, Reducer {
 
   @Override
   public HashMap map(List list) {
-    HashMap results = new HashMap<>();
+    HashMap results = new HashMap();
 
     for (Object r : list) {
       String record = (String) r;
       String[] tokens = record.split(",");
       int hour = Helper.grabHour(tokens[0]);
       int minute = Helper.grabMinute(tokens[0]);
-      // int second = Helper.grabSecond(tokens[0]);
-      
-      boolean withinTime = hour >= START_TIME && hour <= END_TIME; ;
+      // int second = Helper.grabSecond(tokens[0]);    
+
+      boolean withinTime = hour >= START_TIME && hour <= END_TIME;
       if(hour == END_TIME) {
         withinTime = minute == 0;
       }
 
       if (tokens[2].startsWith(FILTER) && withinTime) {
-        if(results.get(tokens[2])==null) {
-          results.put(tokens[2],1);
+        if(results.get(tokens[2]) == null) {
+          results.put(tokens[2], tokens[1]);
         } else {
-          int i = (int) results.get(tokens[2]);
-          results.put(tokens[2],i+1);
+          String prev = (String) results.get(tokens[2]);
+          results.put(tokens[2], prev + "," + tokens[1]);
         }
       }
     }
@@ -46,12 +46,18 @@ public class TaskOne implements Mapper, Reducer {
   public HashMap reduce(Object key, List data) {
     HashMap map = new HashMap();
     int count = 0;
+    String combine = "";
+
     for(Object o: data){
-      int v = (int) o;
-      count+= v;
+      // Need to append a "," infront
+      combine += "," + (String) o;
     }
-    map.put(key,count);
-    // System.out.println("Reduced size: " + map.size());
+
+    // Clear the first comma with substring
+    String[] ids = combine.substring(1).split(",");
+    Set unique = new HashSet(Arrays.asList(ids));
+
+    map.put(key, unique.size());
     return map;
   }
 
