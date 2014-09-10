@@ -37,5 +37,15 @@ public class Helper {
   public static int grabHour(String dateStr) {
     int pos = dateStr.indexOf(" ");
     return Integer.parseInt(dateStr.substring(pos + 1, pos + 3));
+  }
+
+  public static int grabMinute(String dateStr) {
+    int pos = dateStr.indexOf(" ");
+    return Integer.parseInt(dateStr.substring(pos + 4, pos + 6));
   }  
+
+  public static int grabSecond(String dateStr) {
+    int pos = dateStr.indexOf(" ");
+    return Integer.parseInt(dateStr.substring(pos + 7, pos + 9));
+  }    
 }

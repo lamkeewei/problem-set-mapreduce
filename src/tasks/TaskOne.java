@@ -21,11 +21,17 @@ public class TaskOne implements Mapper, Reducer {
       String record = (String) r;
       String[] tokens = record.split(",");
       int hour = Helper.grabHour(tokens[0]);
+      int minute = Helper.grabMinute(tokens[0]);
+      int second = Helper.grabSecond(tokens[0]);
       
-      boolean withinTime = hour >= START_TIME && hour <= END_TIME; 
+      boolean withinTime = hour >= START_TIME && hour <= END_TIME; ;
+      if(hour == END_TIME) {
+        withinTime = minute == 0;
+      }
 
       if (tokens[2].startsWith(FILTER) && withinTime) {
         results.put(tokens[2], tokens[1]);
+        System.out.println(hour + ":" + minute);
       }
     }
 
