@@ -28,14 +28,15 @@ public class TaskOne implements Mapper, Reducer {
       if(hour == END_TIME) {
         withinTime = minute == 0;
       }
-
       if (tokens[2].startsWith(FILTER) && withinTime) {
         if(results.get(tokens[2])==null) {
-          results.put(tokens[2],1);
-        } else {
-          int i = (int) results.get(tokens[2]);
-          results.put(tokens[2],i+1);
+          List<String> userIds = new ArrayList<>();
+          userIds.add(tokens[1]);
+          results.put(tokens[2],userIds);
         }
+        List<String> userIds = (ArrayList<String>) results.get(tokens[2]);
+        userIds.add(tokens[1]);
+        results.put(tokens[2],userIds);
       }
     }
     // System.out.println("Results size: " + results.size());
@@ -46,11 +47,19 @@ public class TaskOne implements Mapper, Reducer {
   public HashMap reduce(Object key, List data) {
     HashMap map = new HashMap();
     int count = 0;
+    Set<String> userIds = new HashSet<>();
+    int uniqueCount = 0;
     for(Object o: data){
-      int v = (int) o;
-      count+= v;
+      List<String> list = (ArrayList) o;
+      for(String id:list) {
+        if (!userIds.contains(id)) {
+          userIds.add(id);
+          uniqueCount++;
+        }
+      }
+      
     }
-    map.put(key,count);
+    map.put(key,uniqueCount);
     // System.out.println("Reduced size: " + map.size());
     return map;
   }
@@ -94,10 +103,13 @@ public class TaskOne implements Mapper, Reducer {
 
     int max = 0;
     String location = "";
+    System.out.println("Results size: " + results.size());
 
     for (Object key : results.keySet()) {
       // list size is 1, caused reducer also performed combine step
-      int size = (int)results.get(key).get(0);
+      int size = (int) results.get(key).get(0);
+      String room = (String) key;
+      System.out.println("Room : " + room +" / Size : " + size);
       if (size > max) {
         max = size;
         location = (String) key;
