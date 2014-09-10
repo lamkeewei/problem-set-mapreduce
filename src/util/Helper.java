@@ -3,6 +3,8 @@ package util;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Map;
+import java.util.HashMap;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -30,8 +32,33 @@ public class Helper {
       while ((line = in.readLine())!= null) {
         data.add(line); 
       }
+      
       in.close();
       return data;
+  }
+
+  public static Map<String, String> loadLocationMappings () 
+    throws IOException{
+
+    System.out.println("Loading Location Mappings...");
+
+    Map<String,String> map = new HashMap<>();
+
+    InputStream is = Helper.class.getResourceAsStream("/data/location_room_mapping.csv");
+    Reader reader = new InputStreamReader(is); 
+
+    BufferedReader in = new BufferedReader(reader);
+
+    // Skip header row
+    String line = in.readLine();
+
+    while ((line = in.readLine()) != null) {
+      String[] tokens = line.split(",");
+      map.put(tokens[0], tokens[1]);
+    }
+
+    in.close();
+    return map;
   }
 
   public static int grabHour(String dateStr) {

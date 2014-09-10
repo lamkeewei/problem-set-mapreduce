@@ -12,6 +12,8 @@ public class TaskOne implements Mapper, Reducer {
   private final String FILTER = "101020";
   private final int START_TIME = 12;
   private final int END_TIME = 13;
+  private static Map<String,String> locationMapping;
+  private final String PATTERN = "(.*)2-[0-9][0-9]?";
 
   @Override
   public HashMap map(List list) {
@@ -22,19 +24,20 @@ public class TaskOne implements Mapper, Reducer {
       String[] tokens = record.split(",");
       int hour = Helper.grabHour(tokens[0]);
       int minute = Helper.grabMinute(tokens[0]);
-      // int second = Helper.grabSecond(tokens[0]);    
+      // int second = Helper.grabSecond(tokens[0]);
+      String roomID = locationMapping.get(tokens[2]);
 
       boolean withinTime = hour >= START_TIME && hour <= END_TIME;
       if(hour == END_TIME) {
         withinTime = minute == 0;
       }
 
-      if (tokens[2].startsWith(FILTER) && withinTime) {
-        if(results.get(tokens[2]) == null) {
-          results.put(tokens[2], tokens[1]);
+      if (tokens[2].startsWith(FILTER) && withinTime && roomID.matches(PATTERN)) {
+        if(results.get(roomID) == null) {
+          results.put((String) roomID, tokens[1]);
         } else {
-          String prev = (String) results.get(tokens[2]);
-          results.put(tokens[2], prev + "," + tokens[1]);
+          String prev = (String) results.get(roomID);
+          results.put((String) roomID, prev + "," + tokens[1]);
         }
       }
     }
@@ -66,6 +69,9 @@ public class TaskOne implements Mapper, Reducer {
     List<String> data = new ArrayList<>();
 
     try {
+      locationMapping = Helper.loadLocationMappings();
+      System.out.println(locationMapping.keySet().size() + " mappings loaded");
+
       for (String fileName : args) {
         data.addAll(Helper.readFile(fileName));
       }
@@ -84,8 +90,7 @@ public class TaskOne implements Mapper, Reducer {
     System.gc(); 
     long s = System.currentTimeMillis();
 
-    try { 
-
+    try {       
       results = MapReduce.mapReduce(mapper, reducer, data, 5); 
 
     } catch (InterruptedException e) {
