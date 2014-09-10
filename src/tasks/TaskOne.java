@@ -34,10 +34,13 @@ public class TaskOne implements Mapper, Reducer {
 
       if (tokens[2].startsWith(FILTER) && withinTime && roomID.matches(PATTERN)) {
         if(results.get(roomID) == null) {
-          results.put((String) roomID, tokens[1]);
+          List newList = new ArrayList();
+          newList.add(tokens[1]);
+
+          results.put((String) roomID, newList);
         } else {
-          String prev = (String) results.get(roomID);
-          results.put((String) roomID, prev + "," + tokens[1]);
+          List prev = (ArrayList) results.get(roomID);
+          prev.add(tokens[1]);
         }
       }
     }
@@ -47,20 +50,15 @@ public class TaskOne implements Mapper, Reducer {
 
   @Override
   public HashMap reduce(Object key, List data) {
-    HashMap map = new HashMap();
-    int count = 0;
-    String combine = "";
+    HashMap map = new HashMap(1);
+    Set set = new HashSet();
 
     for(Object o: data){
       // Need to append a "," infront
-      combine += "," + (String) o;
-    }
+      set.addAll((List) o);    
+    }  
 
-    // Clear the first comma with substring
-    String[] ids = combine.substring(1).split(",");
-    Set unique = new HashSet(Arrays.asList(ids));
-
-    map.put(key, unique.size());
+    map.put(key, set.size());
     return map;
   }
 
