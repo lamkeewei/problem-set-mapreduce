@@ -20,21 +20,23 @@ public class TaskOne implements Mapper, Reducer {
 
     for (Object r : list) {
       String record = (String) r;
-      String[] tokens = record.split(",");
-      int hour = Helper.grabHour(tokens[0]);
-      String roomID = locationMapping.get(tokens[2]);
+      String[] tokens = record.split(",");      
+      String roomID = locationMapping.get(tokens[2]);      
 
-      boolean withinTime = hour == START_TIME || tokens[2].indexOf("13:00:00") > -1;
+      if (tokens[2].startsWith(FILTER) && roomID.indexOf("SR2-") > -1) {
+        int hour = Helper.grabHour(tokens[0]);
+        boolean withinTime = hour == START_TIME || tokens[2].indexOf("13:00:00") > -1;
 
-      if (tokens[2].startsWith(FILTER) && withinTime && roomID.indexOf("SR2-") > -1) {
-        if(results.get(roomID) == null) {
-          List newList = new LinkedList();
-          newList.add(tokens[1]);
+        if (withinTime) {          
+          if(results.get(roomID) == null) {
+            List newList = new LinkedList();
+            newList.add(tokens[1]);
 
-          results.put((String) roomID, newList);
-        } else {
-          List prev = (LinkedList) results.get(roomID);
-          prev.add(tokens[1]);
+            results.put((String) roomID, newList);
+          } else {
+            List prev = (LinkedList) results.get(roomID);
+            prev.add(tokens[1]);
+          }
         }
       }
     }
