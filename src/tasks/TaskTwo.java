@@ -50,6 +50,7 @@ public class TaskTwo implements Mapper, Reducer {
 
             if (users == null) {
               users = new HashSet<String>();
+              prev.put(roomID, users);
             }
             
             users.add(tokens[1]);
