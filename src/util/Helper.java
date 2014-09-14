@@ -61,6 +61,11 @@ public class Helper {
     return map;
   }
 
+  public static int grabDate(String dateStr) {
+    int pos = dateStr.indexOf(" ");
+    return Integer.parseInt(dateStr.substring(pos - 2, pos));
+  }
+
   public static int grabHour(String dateStr) {
     int pos = dateStr.indexOf(" ");
     return Integer.parseInt(dateStr.substring(pos + 1, pos + 3));
