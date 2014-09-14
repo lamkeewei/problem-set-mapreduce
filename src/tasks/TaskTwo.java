@@ -1,3 +1,8 @@
+/* 
+  Which SIS level 2 classroom has the highest maximum number 
+  of users per day from 12:00:00 to 13:00:00?
+*/
+
 package tasks;
 
 import java.io.*;
@@ -30,16 +35,24 @@ public class TaskTwo implements Mapper, Reducer {
         if (withinTime) {
           int date = Helper.grabDate(tokens[0]);
           String id = (String) roomID;
-          id += date;
 
-          if(results.get(roomID) == null) {
-            List newList = new LinkedList();
-            newList.add(tokens[1]);
 
-            results.put(id, newList);
+          if(results.get(date) == null) {
+            Map<String, Set<String>> roomRecords = new HashMap<>();
+            Set<String> users = new HashSet<>();
+            users.add(tokens[1]);
+            roomRecords.put(roomID, users);
+
+            results.put(date, roomRecords);
           } else {
-            List prev = (LinkedList) results.get(id);
-            prev.add(tokens[1]);
+            Map<String, Set<String>> prev = (Map<String, Set<String>>) results.get(date);
+            Set<String> users = prev.get(roomID);
+
+            if (users == null) {
+              users = new HashSet<String>();
+            }
+            
+            users.add(tokens[1]);
           }
         }
       }
@@ -51,13 +64,32 @@ public class TaskTwo implements Mapper, Reducer {
   @Override
   public HashMap reduce(Object key, List data) {
     HashMap map = new HashMap(1);
-    Set set = new HashSet();
+    HashMap<String, Set<String>> roomCounts = new HashMap<>();
 
-    for(Object o: data){
-      set.addAll((List) o);    
-    }  
+    for (Object o : data) {
+      HashMap<String, Set<String>> roomRecords = (HashMap<String, Set<String>>) o;
 
-    map.put(key, set.size());
+      for (String id : roomRecords.keySet()) {        
+        if (roomCounts.get(id) == null) {
+          roomCounts.put(id, new HashSet<String>());
+        }
+
+        Set<String> userIds = roomCounts.get(id);
+        userIds.addAll(roomRecords.get(id));
+      }
+    }
+
+    String maxRoom = "";
+    int maxCount = 0;
+    for (String id : roomCounts.keySet()) {
+      int count = roomCounts.get(id).size();
+
+      if (count > maxCount) {
+        maxRoom = id + ":" + count;
+      }
+    }
+
+    map.put(key, maxRoom);
     return map;
   }
 
@@ -100,19 +132,10 @@ public class TaskTwo implements Mapper, Reducer {
 
     System.out.println("Clock time elapsed: " + (e - s) + " ms");
 
-    int max = 0;
-    String location = "";
-
     for (Object key : results.keySet()) {
-      // list size is 1, caused reducer also performed combine step
-      int size = (int)results.get(key).get(0);
-      if (size > max) {
-        max = size;
-        location = (String) key;
-      }
-    }
+      List values = results.get(key);
 
-    System.out.println("Count: " + max);
-    System.out.println("Location: " + location);
+      System.out.println(key + "/02/2014 - " + values.get(0));
+    }
   }
 }
