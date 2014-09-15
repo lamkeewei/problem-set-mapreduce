@@ -84,7 +84,7 @@ public class TaskOne implements Mapper, Reducer {
     long s = System.currentTimeMillis();
 
     try {       
-      results = MapReduce.mapReduce(mapper, reducer, data, 5); 
+      results = MapReduce.mapReduce(mapper, reducer, data, 1); 
 
     } catch (InterruptedException e) {
 

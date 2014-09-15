@@ -86,6 +86,7 @@ public class TaskTwo implements Mapper, Reducer {
       int count = roomCounts.get(id).size();
 
       if (count > maxCount) {
+        maxCount = count;
         maxRoom = id + ":" + count;
       }
     }
