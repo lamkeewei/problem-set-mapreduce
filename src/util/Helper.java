@@ -32,6 +32,17 @@ public class Helper {
       return data;
   }
 
+  public static int grabMonth(String dateStr) {
+    int pos = 0;
+    return Integer.parseInt(dateStr.substring(pos + 5, pos + 7));
+  }
+
+  public static int grabDay(String dateStr) {
+    int pos = 0;
+    return Integer.parseInt(dateStr.substring(pos + 8, pos + 10));
+  }
+
+
   public static int grabHour(String dateStr) {
     int pos = dateStr.indexOf(" ");
     return Integer.parseInt(dateStr.substring(pos + 1, pos + 3));

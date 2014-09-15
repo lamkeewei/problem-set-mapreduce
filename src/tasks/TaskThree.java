@@ -27,19 +27,18 @@ public class TaskThree implements Mapper, Reducer {
       String[] tokens = record.split(",");
       String locationCode = tokens[2];
       String roomID = (String) locationMap.get(locationCode);
-      // key = hour
       if (roomID != null && roomID.equals("SMUSISL3SR3-1")) {
         String userId = tokens[1];
         int hour = Helper.grabHour(tokens[0]);
-        List<String> userIds = (List<String>) results.get(hour);
 
+        List<String> userIds = (ArrayList<String>) results.get(hour);
         if (userIds == null) {
           userIds = new ArrayList<String>();
-          userIds.add(userId);
-          results.put(hour, userIds);
-        } else {
+        }
+        if(!userIds.contains(userId)) {
           userIds.add(userId);
         }
+        results.put(hour, userIds);
       }
     }
     return results;
@@ -47,14 +46,18 @@ public class TaskThree implements Mapper, Reducer {
 
   @Override
   public HashMap reduce(Object key, List data) {
-    HashMap map = new HashMap(1);
-    List<String> userIds = new ArrayList<>();
+    HashMap map = new HashMap();
+    Set<String> userIds = new HashSet<>();
+    for(Object o: data){
+      List<String> list = (ArrayList) o;
+      for(String id:list) {
+        if (!userIds.contains(id)) {
+          userIds.add(id);
+        }
+      }
 
-    for (Object o : data) {
-      userIds.addAll((List<String>) o);
     }
-
-    map.put(key, userIds.size());
+    map.put(key,userIds.size());
     return map;
   }
 
@@ -105,7 +108,7 @@ public class TaskThree implements Mapper, Reducer {
     for (Object key : results.keySet()) {
       List values = results.get(key);
 
-      System.out.println(key + ":00:00 - " + values.get(0) + " people");
+      System.out.println(key + ":00:00 - " + values.get(0) + " unique visitors");
     }
   }
 }

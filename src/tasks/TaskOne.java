@@ -32,14 +32,17 @@ public class TaskOne implements Mapper, Reducer {
         withinTime = Helper.grabMinute(tokens[0]) == 0;
       }
 
-      if (locationCode.startsWith(FILTER) && withinTime) {
+      if (locationCode.startsWith(FILTER) && withinTime && location.indexOf("L2SR2")!=-1) {
         List<String> userIds = null;
+        String userId = (String) tokens[1];
         if(results.get(location)==null) {
           userIds = new ArrayList<>();
         } else {
           userIds = (ArrayList<String>) results.get(location);
         }
-        userIds.add(tokens[1]);
+        if(!userIds.contains(userId)) {
+          userIds.add(userId);
+        }
         results.put(location,userIds);
       }
     }
@@ -61,7 +64,6 @@ public class TaskOne implements Mapper, Reducer {
 
     }
     map.put(key,userIds.size());
-    // System.out.println("Reduced size: " + map.size());
     return map;
   }
 

@@ -3,144 +3,138 @@
   of users per day from 12:00:00 to 13:00:00?
 */
 
-package tasks;
+  package tasks;
 
-import java.io.*;
-import java.util.*;
-import aa.Mapper;
-import aa.Reducer;
-import aa.MapReduce;
-import util.Helper;
-import java.net.*;
+  import java.io.*;
+  import java.util.*;
+  import aa.Mapper;
+  import aa.Reducer;
+  import aa.MapReduce;
+  import util.Helper;
+  import java.net.*;
 
-public class TaskTwo implements Mapper, Reducer { 
-  private final String FILTER = "101020";
-  private final int START_TIME = 12;
-  private final int END_TIME = 13;
-  private static HashMap locationMap;
+  public class TaskTwo implements Mapper, Reducer { 
+    private final String FILTER = "101020";
+    private final int START_TIME = 12;
+    private final int END_TIME = 13;
+    private static HashMap locationMap;
 
-  @Override
-  public HashMap map(List list) {
-    HashMap results = new HashMap();
+    @Override
+    public HashMap map(List list) {
+      HashMap results = new HashMap<>();
 
-    for (Object r : list) {
-      String record = (String) r;
-      String[] tokens = record.split(",");      
-      String roomID = locationMapping.get(tokens[2]);      
-
-      if (tokens[2].startsWith(FILTER) && roomID.indexOf("SR2-") > -1) {
+      for (Object r : list) {
+        String record = (String) r;
+        String[] tokens = record.split(",");
+        int month = Helper.grabMonth(tokens[0]);
+        int day = Helper.grabDay(tokens[0]);
         int hour = Helper.grabHour(tokens[0]);
-        boolean withinTime = hour == START_TIME || tokens[2].indexOf("13:00:00") > -1;
+        String locationCode = tokens[2];
+        String location = (String) locationMap.get(locationCode);
+      // int second = Helper.grabSecond(tokens[0]);
 
-        if (withinTime) {
-          int date = Helper.grabDate(tokens[0]);
-          String id = (String) roomID;
+        boolean withinTime = month==2 && hour >= START_TIME && hour <= END_TIME; ;
+        if(hour == END_TIME) {
+          withinTime = Helper.grabMinute(tokens[0]) == 0;
+        }
 
-          if(results.get(date) == null) {
-            Map<String, Set<String>> roomRecords = new HashMap<>();
-            Set<String> users = new HashSet<>();
-            users.add(tokens[1]);
-            roomRecords.put(roomID, users);
+        if (locationCode.startsWith(FILTER) && withinTime && location.indexOf("L2SR2")!=-1) {
+          HashMap map = (HashMap) results.get(day);
+          String userId = (String) tokens[1];
+          if(map==null) {
+            map = new HashMap<>();
+          }
+          List<String> userIds = (ArrayList<String>) map.get(location);
+          if (userIds == null) {
+            userIds = new ArrayList<String>();
+          }
+          if(!userIds.contains(userId)) {
+            userIds.add(userId);
+            map.put(location, userIds);
+          }
+          results.put(day,map);
+        }
+      }
+    // System.out.println("Results size: " + results.size());
+      return results;
+    }
 
-            results.put(date, roomRecords);
+    @Override
+    public HashMap reduce(Object key, List data) {
+      HashMap result = new HashMap();
+      HashMap subMap = new HashMap();
+      for(Object o: data){
+        HashMap map = (HashMap) o;
+        for(Object subKey:map.keySet()) {
+          int count = 0;
+          if (subMap.containsKey(subKey)) {
+            count = (int) subMap.get(subKey);
+          } 
+          List list = (ArrayList) map.get(subKey);
+          count += list.size();
+          subMap.put(subKey,count);
+        }
+      }
+      result.put(key,subMap);
+      return result;
+    }
+
+    public static void main(String[] args) {
+      List<String> data = new ArrayList<>();
+      List<String> locations = new ArrayList<>();
+
+      try {
+        int i = 0;
+        for (String fileName : args) {
+          if(i==0) {
+            locations.addAll(Helper.readFile(fileName));
+            i++;
           } else {
-            Map<String, Set<String>> prev = (Map<String, Set<String>>) results.get(date);
-            Set<String> users = prev.get(roomID);
-
-            if (users == null) {
-              users = new HashSet<String>();
-              prev.put(roomID, users);
-            }
-            
-            users.add(tokens[1]);
+            data.addAll(Helper.readFile(fileName));
           }
         }
+        System.out.println(data.size() + " records loaded");
+      } catch (IOException e) {
+        System.err.println("Can't read file.  See stack trace");
+        e.printStackTrace();
+        System.exit(0);
       }
-    }
-    // System.out.println("Results size: " + results.size());
-    return results;
-  }
 
-  @Override
-  public HashMap reduce(Object key, List data) {
-    HashMap map = new HashMap(1);
-    HashMap<String, Set<String>> roomCounts = new HashMap<>();
+      locationMap = Helper.mapLocation(locations);
 
-    for (Object o : data) {
-      HashMap<String, Set<String>> roomRecords = (HashMap<String, Set<String>>) o;
+      TaskTwo mapper = new TaskTwo(); 
+      TaskTwo reducer = new TaskTwo(); 
+      HashMap<Object, List> results = null;
 
-      for (String id : roomRecords.keySet()) {        
-        if (roomCounts.get(id) == null) {
-          roomCounts.put(id, new HashSet<String>());
+      System.gc(); 
+      long s = System.currentTimeMillis();
+
+      try {       
+        results = MapReduce.mapReduce(mapper, reducer, data, 5); 
+
+      } catch (InterruptedException e) {
+
+        System.out.println("Something unexpected happened");
+        e.printStackTrace();
+      }
+
+      long e = System.currentTimeMillis(); 
+
+      System.out.println("Clock time elapsed: " + (e - s) + " ms");
+      for (Object key : results.keySet()) {
+        Map subResults = (HashMap)results.get(key).get(0);
+        int max = 0;
+        Object maxSubKey = null;
+        for(Object subKey : subResults.keySet()) {
+          int v = (int) subResults.get(subKey);
+          if (v>max) {
+            max = v;
+            maxSubKey = subKey;
+          }
+          
         }
-
-        Set<String> userIds = roomCounts.get(id);
-        userIds.addAll(roomRecords.get(id));
+        System.out.println(key + "/02/2014 - " + maxSubKey + " : "+ max);
+        
       }
-    }
-
-    String maxRoom = "";
-    int maxCount = 0;
-    for (String id : roomCounts.keySet()) {
-      int count = roomCounts.get(id).size();
-
-      if (count > maxCount) {
-        maxRoom = id + ":" + count;
-      }
-    }
-
-    map.put(key, maxRoom);
-    return map;
-  }
-
-  
-  public static void main(String[] args) {
-    List<String> data = new ArrayList<>();
-    List<String> locations = new ArrayList<>();
-
-    try {
-      int i = 0;
-      for (String fileName : args) {
-        if(i==0) {
-          locations.addAll(Helper.readFile(fileName));
-          i++;
-        } else {
-          data.addAll(Helper.readFile(fileName));
-        }
-      }
-      System.out.println(data.size() + " records loaded");
-    } catch (IOException e) {
-      System.err.println("Can't read file.  See stack trace");
-      e.printStackTrace();
-      System.exit(0);
-    }
-
-    locationMap = Helper.mapLocation(locations);
-
-    TaskTwo mapper = new TaskTwo(); 
-    TaskTwo reducer = new TaskTwo(); 
-    HashMap<Object, List> results = null;
-
-    System.gc(); 
-    long s = System.currentTimeMillis();
-
-    try {       
-      results = MapReduce.mapReduce(mapper, reducer, data, 5); 
-
-    } catch (InterruptedException e) {
-
-      System.out.println("Something unexpected happened");
-      e.printStackTrace();
-    }
-
-    long e = System.currentTimeMillis(); 
-
-    System.out.println("Clock time elapsed: " + (e - s) + " ms");
-
-    for (Object key : results.keySet()) {
-      List values = results.get(key);
-
-      System.out.println(key + "/02/2014 - " + values.get(0));
     }
   }
-}

@@ -1,37 +1,78 @@
 #Problem Set 2 - Question 3: MapReduce
 =====================
 ##Part 1 Results
+
 Clock time elapsed: 1474 ms
 
+```
 Room : SMUSISL2SR2-3 / Size : 881
 **Room : SMUSISL2SR2-2 / Size : 1397**
 Room : SMUSISL2SR2-4 / Size : 943
 Room : SMUSISL2SR2-1 / Size : 689
+```
+
+##Part 2 Results
+
+Clock time elapsed: 2822 ms
+
+```
+1/02/2014 - SMUSISL2SR2-4 : 5
+2/02/2014 - SMUSISL2SR2-2 : 11
+3/02/2014 - SMUSISL2SR2-2 : 102
+4/02/2014 - SMUSISL2SR2-2 : 135
+5/02/2014 - SMUSISL2SR2-2 : 167
+6/02/2014 - SMUSISL2SR2-2 : 128
+7/02/2014 - SMUSISL2SR2-2 : 115
+8/02/2014 - SMUSISL2SR2-1 : 77
+9/02/2014 - SMUSISL2SR2-2 : 20
+10/02/2014 - SMUSISL2SR2-2 : 140
+11/02/2014 - SMUSISL2SR2-2 : 124
+12/02/2014 - SMUSISL2SR2-2 : 179
+13/02/2014 - SMUSISL2SR2-2 : 137
+14/02/2014 - SMUSISL2SR2-2 : 127
+15/02/2014 - SMUSISL2SR2-4 : 30
+16/02/2014 - SMUSISL2SR2-2 : 25
+17/02/2014 - SMUSISL2SR2-2 : 141
+18/02/2014 - SMUSISL2SR2-2 : 129
+19/02/2014 - SMUSISL2SR2-2 : 170
+20/02/2014 - SMUSISL2SR2-2 : 123
+21/02/2014 - SMUSISL2SR2-2 : 104
+22/02/2014 - SMUSISL2SR2-4 : 82
+23/02/2014 - SMUSISL2SR2-4 : 10
+24/02/2014 - SMUSISL2SR2-2 : 41
+25/02/2014 - SMUSISL2SR2-2 : 61
+26/02/2014 - SMUSISL2SR2-2 : 51
+27/02/2014 - SMUSISL2SR2-2 : 32
+28/02/2014 - SMUSISL2SR2-2 : 39
+```
 
 ##Part 3 Results
 
-Clock time elapsed: 1165 ms
-0:00:00 - 64 people
-1:00:00 - 11 people
+Clock time elapsed: 2328 ms
+
+```
+0:00:00 - 18 people
+1:00:00 - 7 people
 2:00:00 - 2 people
-3:00:00 - 13 people
-4:00:00 - 5 people
-5:00:00 - 15 people
-6:00:00 - 23 people
-7:00:00 - 27 people
-8:00:00 - 3477 people
-9:00:00 - 5134 people
-10:00:00 - 5458 people
-11:00:00 - 4323 people
-12:00:00 - 6386 people
-13:00:00 - 6638 people
-**14:00:00 - 7587 people**
-15:00:00 - 6186 people
-16:00:00 - 5969 people
-17:00:00 - 5336 people
-18:00:00 - 4692 people
-19:00:00 - 1929 people
-20:00:00 - 1544 people
-21:00:00 - 1269 people
-22:00:00 - 536 people
-23:00:00 - 282 people
+3:00:00 - 6 people
+4:00:00 - 1 people
+5:00:00 - 4 people
+6:00:00 - 4 people
+7:00:00 - 17 people
+8:00:00 - 388 people
+9:00:00 - 449 people
+10:00:00 - 476 people
+11:00:00 - 634 people
+12:00:00 - 640 people
+13:00:00 - 652 people
+14:00:00 - 595 people
+**15:00:00 - 949 people**
+16:00:00 - 535 people
+17:00:00 - 510 people
+18:00:00 - 508 people
+19:00:00 - 324 people
+20:00:00 - 188 people
+21:00:00 - 171 people
+22:00:00 - 92 people
+23:00:00 - 56 people
+```
