@@ -35,7 +35,7 @@
 
         boolean withinTime = month==2 && hour >= START_TIME && hour <= END_TIME; ;
         if(hour == END_TIME) {
-          withinTime = Helper.grabMinute(tokens[0]) == 0;
+          withinTime = Helper.grabMinute(tokens[0]) == 0 && Helper.grabSecond(tokens[0])==0;
         }
 
         if (locationCode.startsWith(FILTER) && withinTime && location.indexOf("L2SR2")!=-1) {
@@ -102,39 +102,41 @@
 
       locationMap = Helper.mapLocation(locations);
 
-      TaskTwo mapper = new TaskTwo(); 
-      TaskTwo reducer = new TaskTwo(); 
-      HashMap<Object, List> results = null;
+      System.gc();
 
-      System.gc(); 
-      long s = System.currentTimeMillis();
+        TaskTwo mapper = new TaskTwo(); 
+        TaskTwo reducer = new TaskTwo(); 
+        HashMap<Object, List> results = null;
 
-      try {       
-        results = MapReduce.mapReduce(mapper, reducer, data, 5); 
+        long s = System.currentTimeMillis();
 
-      } catch (InterruptedException e) {
+        try {       
+          results = MapReduce.mapReduce(mapper, reducer, data, 5); 
 
-        System.out.println("Something unexpected happened");
-        e.printStackTrace();
-      }
+        } catch (InterruptedException e) {
 
-      long e = System.currentTimeMillis(); 
-
-      System.out.println("Clock time elapsed: " + (e - s) + " ms");
-      for (Object key : results.keySet()) {
-        Map subResults = (HashMap)results.get(key).get(0);
-        int max = 0;
-        Object maxSubKey = null;
-        for(Object subKey : subResults.keySet()) {
-          int v = (int) subResults.get(subKey);
-          if (v>max) {
-            max = v;
-            maxSubKey = subKey;
-          }
-          
+          System.out.println("Something unexpected happened");
+          e.printStackTrace();
         }
-        System.out.println(key + "/02/2014 - " + maxSubKey + " : "+ max);
-        
-      }
+
+        long e = System.currentTimeMillis(); 
+
+        System.out.println("Clock time elapsed: " + (e - s) + " ms");
+        for (Object key : results.keySet()) {
+          Map subResults = (HashMap)results.get(key).get(0);
+          int max = 0;
+          Object maxSubKey = null;
+          for(Object subKey : subResults.keySet()) {
+            int v = (int) subResults.get(subKey);
+            if (v>max) {
+              max = v;
+              maxSubKey = subKey;
+            }
+
+          }
+          System.out.println(key + "/02/2014 - " + maxSubKey + " : "+ max);
+
+        }
+      
     }
   }

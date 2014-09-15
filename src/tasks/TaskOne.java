@@ -29,7 +29,7 @@ public class TaskOne implements Mapper, Reducer {
 
       boolean withinTime = hour >= START_TIME && hour <= END_TIME; ;
       if(hour == END_TIME) {
-        withinTime = Helper.grabMinute(tokens[0]) == 0;
+        withinTime = Helper.grabMinute(tokens[0]) == 0 && Helper.grabSecond(tokens[0])==0;
       }
 
       if (locationCode.startsWith(FILTER) && withinTime && location.indexOf("L2SR2")!=-1) {
